@@ -1,0 +1,201 @@
+@RenderPage("SessionExpired.cshtml")
+@{ 
+  Session["Important"] = 000;
+  var db = Database.Open("eos_ums");
+  string departmentSQL = "";
+  if(Session["s_un"] != null || Session["s_un"] != "")
+  {
+    departmentSQL = "SELECT d_id FROM [eos_ums].[dbo].[tbl_uDetails] WHERE u_en = @0";
+    Session["department"] = db.QueryValue(departmentSQL, Session["s_un"]);
+  }
+  Permissions permissions = new Permissions();
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  
+  <head>
+    <meta charset="utf-8" />
+    <title>EOS V2</title>
+    <link rel="stylesheet" href="Content/Bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="Content/Jquery-Confirm/jquery-confirm.min.css" />
+
+  </head>
+  <body>
+    <div class="row">
+      <div id="loading" class="span12">
+        <img id="loading-image" src="Content/Images/loader.gif" alt="Loading..." />
+      </div>
+    </div>
+    <div class="row">
+      <div class="span2">
+        <ul class="nav nav-list">
+          <li><a href="Pages/Home.cshtml" target="eCRM_frame"  onclick="naviagte()"><i class="icon-home"></i> Home</a></li>
+          @application(permissions)
+          @processed_application_listing(permissions)
+          @customer_profile(permissions)
+          @report(permissions)         
+          @email_adminstration(permissions)          
+          @admin_setting(permissions)
+
+          <!-- Start of Soon Deleted -->
+          <hr/>
+          <p>Testing</p>
+          <li><a href="SchedularTask/Task_ReadMYC.cshtml" target="eCRM_frame"><i class="icon-list"></i> (Testing) Read MYC Files</a></li>
+          <li><a href="SchedularTask/Task_MailMonthly.cshtml" target="eCRM_frame"><i class="icon-list"></i> (Testing) Monthly Scheduler</a></li>
+          <!-- End of Soon Deleted -->
+        </ul>
+      </div>
+      <div class="span10">
+        <div id="nested_loading" style="width:100% !important; height:100% !important; background:#FFF; position:absolute; "  class="span12">
+          <img id="loading-image" src="Content/Images/loader.gif" alt="Loading..." />
+        </div>
+        <iframe name="eCRM_frame" id="eCRM_frame" src="Pages/Home.cshtml" frameborder="0" scrolling="no" onload="resizeIframe(this);" style="min-height: 1500px" width="100%"></iframe>
+      </div>
+    </div>
+    <script src="Content/JS/jquery.js"></script>
+    <script src="Content/Bootstrap/js/bootstrap.min.js"></script>
+    <script src="Content/JS/Parent.js"></script>
+    <script type="text/javascript">
+      $(window).load(function () {
+        setTimeout(function () {
+          $('#loading').hide();
+        }, 500);
+      });
+
+      $(function () {
+        $('#searchMenu').keyup(function () {
+          var searchText = $(this).val().toLowerCase(),
+          $allListElements = $('ul > li'),
+          $matchingListElements = $allListElements.filter(function (i, el) {
+            return $(el).text().toLowerCase().indexOf(searchText) !== -1;
+          });
+          $allListElements.hide();
+          $matchingListElements.show();
+        });
+      });
+
+      function resizeIframe(obj) {
+        $('#nested_loading').hide();
+        //obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+        //top.resizeChild('e-CRM', obj.contentWindow.document.body.scrollHeight);
+		obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+        //parent.resizeResult();
+      }
+
+      function resize(height) {
+        var parentFrame = $('#e-CRM_frame', window.parent.document);
+        var childFrame = $('#eCRM_frame');
+        parentFrame.height(parentFrame.height()+height);
+        childFrame.height(childFrame.height()+height);
+      }
+
+      function resizeResult() {
+        var get_obj = document.getElementById('eCRM_frame');
+        resizeIframe(get_obj);
+      }
+
+      function naviagte(){
+        $('#nested_loading').show();    
+      }
+    </script>
+  </body>
+</html>
+
+@helper application(Permissions permissions)
+{
+  if(permissions.check(Perm.View_Application) || permissions.check(Perm.View_ApplicationListing) || permissions.check(Perm.View_PendingApprovalListing) || permissions.check(Perm.View_PendingDeleteListing) || permissions.check(Perm.View_RejectedListing))
+  {
+    <hr/><p>Application</p>          
+  }
+  if(permissions.check(Perm.View_Application))
+  {
+    <li><a href="Pages/Registration.cshtml" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Application Registration</a></li>
+  }
+  if(permissions.check(Perm.View_ApplicationListing))
+  {
+    <li><a href="Pages/ApplicationList.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Application Listing</a></li>
+  }
+  if(permissions.check(Perm.View_PendingSubmissionListing))
+  {
+    <li><a href="Pages/ApplicationPendingSubmission.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Pending Submission Listing</a></li>
+  }
+  if(permissions.check(Perm.View_PendingApprovalListing))
+  {
+    <li><a href="Pages/ApplicationPendingApproval.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Pending Approval Listing</a></li>
+  }
+  if(permissions.check(Perm.View_RejectedListing))
+  {
+    <li><a href="Pages/ApplicationRejected.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Rejected Listing</a></li>          
+  }
+}
+
+@helper processed_application_listing(Permissions permissions)
+{
+  if(permissions.check(Perm.View_DeletedListing) || permissions.check(Perm.View_ApprovedListing) || permissions.check(Perm.View_FailedListing))
+  {
+    <hr/><p>Processed Application Listing</p>          
+  }
+  if(permissions.check(Perm.View_ApprovedListing))
+  {
+    <li><a href="Pages/ApplicationApproved.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Approved Listing</a></li>
+  }
+}
+
+@helper customer_profile(Permissions permissions)
+{
+  if(permissions.check(Perm.View_CustomerProfileListing))
+  {
+    <hr/><p>Customer Profile</p>
+  }
+  if(permissions.check(Perm.View_CustomerProfileListing))
+  {
+    <li><a href="Pages/CustomerListing_Search.cshtml" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Customer Listing</a></li>
+  }
+}
+
+@helper report(Permissions permissions)
+{
+  if(permissions.check(Perm.View_ProcessingReportListing))
+  {
+    <hr/><p>Report</p>
+  }
+  if(permissions.check(Perm.View_ProcessingReportListing))
+  {
+    <li><a href="Pages/ReportEBS.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i>e-Statement Processing Report</a></li>
+  } 
+  if(permissions.check(Perm.View_SubscriptionListing))
+  {
+    <li><a href="Pages/CustomerSubscriptionListing.cshtml?request=new" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i>Customer Subscription Listing</a></li>
+  } 
+	
+}
+
+@helper email_adminstration(Permissions permissions)
+{
+  if(permissions.check(Perm.View_EmailTemplateManagement) || permissions.check(Perm.View_DailyScheduler) || permissions.check(Perm.View_MonthlyScheduler))
+  {
+    <hr/><p>Email Adminstration</p>
+  }
+  if(permissions.check(Perm.View_EmailTemplateManagement))
+  {
+    <li><a href="Pages/TemplateListing.cshtml" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Email Template Management</a></li>
+  }
+  if(permissions.check(Perm.View_MonthlyScheduler))
+  {
+    <li><a href="Pages/SchedularMonthlyListing.cshtml" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Monthly Schedular</a></li>
+  }
+}
+
+@helper admin_setting(Permissions permissions) 
+{
+  if(permissions.check(Perm.View_ProductManagement))
+  {
+    <hr/><p>Admin Setting</p>
+  }
+  if(permissions.check(Perm.View_ProductManagement))
+  {
+    <li><a href="Pages/ProductManagement.cshtml" target="eCRM_frame" onclick="naviagte()"><i class="icon-list"></i> Product Management</a></li>
+  }
+}
