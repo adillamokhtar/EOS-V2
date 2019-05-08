@@ -1,0 +1,45 @@
+﻿@{
+  string ip_add = Request.ServerVariables["REMOTE_ADDR"].ToString();
+  string sql = "";
+  string userID = "";
+
+  var db_log = Database.Open("eos_log");
+  EOSLog newLog = new EOSLog();
+  sql = newLog.getUserID(ip_add);
+  var result = db_log.QuerySingle(sql);
+  userID = (result.created_id).ToString();
+
+  newLog = new EOSLog(userID);
+  sql = newLog.getSQL(165,ip_add);
+  db_log.Execute(sql);
+
+  var db_ums = Database.Open("eos_ums");
+  sql = "UPDATE tbl_uLogin SET active_datetime = '2001-01-01' WHERE u_id = " + userID;
+  db_ums.Execute(sql);
+	
+	Session.Abandon();
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Rate Feed EUC</title>
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="row">
+      <div class="span2"></div>
+      <div class="span8">
+        <h5 class="text-center">Your session has expired. Please login again.</h5>
+        <p class="text-center"><a href="#" class="btn" onclick="window.close()">Close</a>&nbsp;<a href="#" class="btn" onclick="window.location = 'Default.cshtml';">Login</a></p>
+      </div>
+      <div class="span2"></div>
+    </div>
+    <script>
+      window.history.go(1);
+    </script>
+  </body>
+</html>

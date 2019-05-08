@@ -1,0 +1,380 @@
+﻿@{
+  if(Session["s_un"] == null){
+    Response.Write("<script>window.top.location = 'expired.cshtml';</script>");
+  }
+	if(Session["password_status"] == null){
+    Response.Write("<script>window.top.location = 'expired.cshtml';</script>");
+	}
+	else if(Session["password_status"].ToString() == "expired"){
+		Response.Write("<script>window.top.location = 'login/expired_pass.cshtml';</script>");
+	}
+	else if(Session["password_status"].ToString() == "first_login"){
+		Response.Write("<script>window.top.location = 'login/first_pass.cshtml';</script>");
+	}
+	
+	
+  var db_sys = Database.Open("eos_sys");
+  var db_ums = Database.Open("eos_ums");
+
+  /////////////////Permission Session///////////////////////////
+  string[] perm = Session["perm"] as string[];
+  List<String> mypermission = new List<String>();
+	if(perm != null && perm.Length != 0){
+		for(var i=0; i<perm.Length; i++){
+				mypermission.Add(perm[i]);
+		}
+	}
+	else{
+		Response.Write("<script>window.top.location = 'expired.cshtml';</script>");
+	}
+  ////////////////////////////////////////////////////////////
+
+  string rf_id = "";
+  string eclaf_id = "";
+  string ums_id = "";
+  string param_id = "";
+  string pbt24_id = "";
+  string eos_id = "";
+  string epoms_id = "";
+  string swift_id = "";
+  string ecrm_id = "";
+  string edm_id = "";
+  string edoc_id = "";
+  string gct_id = "";
+  string fve_id = "";
+	
+  string ddfw_id = "";
+  string cat2_id = "";
+  string eod_id = "";
+  string dp_id = "";
+  string cdc_id = "";
+  string autochq_id = "";
+  string h2h_mmpc_id = "";
+  string h2h_etl_id = "";
+  
+  try{var getID0 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_RF'");rf_id = getID0.mod_id.ToString();}catch{rf_id="0";}
+  try{var getID1 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_ECLAFS'");eclaf_id = getID1.mod_id.ToString();}catch{eclaf_id="0";}
+  try{var getID2 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_UMS'");ums_id = getID2.mod_id.ToString();}catch{ums_id="0";}
+  try{var getID3 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_PARAM'");param_id = getID3.mod_id.ToString();}catch{param_id="0";}
+  try{var getID4 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_PBT24'");pbt24_id = getID4.mod_id.ToString();}catch{pbt24_id="0";}
+  try{var getID5 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_MAIN'");eos_id = getID5.mod_id.ToString();}catch{eos_id="0";}
+  try{var getID6 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_EPOMS'");epoms_id = getID6.mod_id.ToString();}catch{epoms_id="0";}
+  try{var getID7 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_SWIFTDB'");swift_id = getID7.mod_id.ToString();}catch{swift_id="0";}
+  try{var getID8 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_ECRM'");ecrm_id = getID8.mod_id.ToString();}catch{ecrm_id="0";}
+  try{var getID9 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_EDM'");edm_id = getID9.mod_id.ToString();}catch{edm_id="0";}
+  try{var getID10 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_EDOC'");edoc_id = getID10.mod_id.ToString();}catch{edoc_id="0";}
+  try{var getID11 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_GCT'");gct_id = getID11.mod_id.ToString();}catch{gct_id="0";}
+  try{var getID12 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_FVE'");fve_id = getID12.mod_id.ToString();}catch{fve_id="0";}
+  
+	
+  try{var getID13= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_ddfw'");ddfw_id = getID13.mod_id.ToString();}catch{ddfw_id="0";}
+  try{var getID14= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_CAT2'");cat2_id = getID14.mod_id.ToString();}catch{cat2_id="0";}
+  try{var getID15= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_EODRTCS'");eod_id = getID15.mod_id.ToString();}catch{eod_id="0";}
+  try{var getID16= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_DOCPREP'");dp_id = getID16.mod_id.ToString();}catch{dp_id="0";}
+  try{var getID17= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_AUTOCHEQUE'");autochq_id = getID17.mod_id.ToString();}catch{autochq_id="0";}
+  try{var getID18= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_H2H_MMPC'");h2h_mmpc_id = getID18.mod_id.ToString();}catch{h2h_mmpc_id="0";}
+  try{var getID19= db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_H2H_ETL'");h2h_etl_id = getID19.mod_id.ToString();}catch{h2h_etl_id="0";}
+  try { var getID20 = db_sys.QuerySingle("SELECT mod_id FROM tbl_module_1 WHERE mod_code='EOS_CDC'"); cdc_id = getID20.mod_id.ToString(); }catch { cdc_id = "0"; }
+
+  string fn = "";
+  string mn = "";
+  string ln = "";
+
+  string sql = "";
+
+	try{
+		sql = "SELECT ISNULL(u_fn,'') as u_fn, ISNULL(u_mn,'') as u_mn, ISNULL(u_ln,'') as u_ln FROM tbl_uDetails WHERE u_id = '"+Session["s_uid"]+"'";
+		var r = db_ums.QuerySingle(sql);
+
+		fn = r.u_fn;
+		mn = r.u_mn;
+		ln = r.u_ln;
+	}
+	catch{}
+
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <title>EOS V2</title>
+      <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+	    <link rel="stylesheet" href="eCRM/Content/Jquery-Confirm/jquery-confirm.min.css" />
+      <style>
+        .hello{
+          padding-top: 10%;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+	          <!--navigation does here-->
+            <ul class="nav" id="brand">
+              <li>
+                <a class="brand" href="#">MIZUHO EOS V2</a>
+              </li>
+            </ul>
+            <ul class="nav" id="myAccount-nav">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">@fn @mn @ln<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a onclick="addTab($(this));" rel="personal-details" title="me/pd.cshtml" href="#">Personal Details</a></li>
+                  <li><a onclick="addTab($(this));" rel="change-password" title="me/cp.cshtml" href="#">Change Password</a></li>
+                  <li><a onclick="addTab($(this));" rel="user-online" title="ums/user/ums_online.cshtml" href="#">User Online</a></li>
+                  <li class="divider"></li>
+                  <li><a href="logout.cshtml">Logout</a></li>
+                </ul>
+              </li>
+            </ul>
+            @if(mypermission.Contains("mod_all_" + rf_id) || mypermission.Contains("mod_all_" + eclaf_id) || mypermission.Contains("mod_all_" + pbt24_id) || mypermission.Contains("mod_all_" + epoms_id) || mypermission.Contains("mod_all_" + swift_id) || mypermission.Contains("mod_all_" + ecrm_id) || mypermission.Contains("mod_all_" + edm_id) || mypermission.Contains("mod_all_" + edoc_id) || mypermission.Contains("mod_all_" + gct_id) || mypermission.Contains("mod_all_" + fve_id) || mypermission.Contains("mod_all_" + ddfw_id) || mypermission.Contains("mod_all_" + cat2_id) || mypermission.Contains("mod_all_" + eod_id) ||
+            mypermission.Contains("mod_all_" + autochq_id) || mypermission.Contains("mod_all_" + h2h_mmpc_id) || mypermission.Contains("mod_all_" + h2h_etl_id) || 
+            mypermission.Contains("mod_all_" + dp_id) || mypermission.Contains("mod_all_" + cdc_id)){
+              <ul class="nav" id="module-nav">
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Module<b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    @if(mypermission.Contains("mod_all_" + rf_id)){
+                      <li><a onclick="addTab($(this));" rel="rate-feed-euc" title="../ratefeed/Default.cshtml" href="#">Rate Feed EUC</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + eclaf_id)){
+                      <li><a onclick="addTab($(this));" rel="e-clafs" title="../sanction/Default.cshtml" href="#">E-CLAFS</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + pbt24_id)){
+                      <li><a onclick="addTab($(this));" rel="pbt24" title="../pbt24/Default.cshtml" href="#">PayBank ETL</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + epoms_id)){
+                      <li><a onclick="addTab($(this));" rel="e-poms" title="../epoms/Default.cshtml" href="#">E-POMS</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + swift_id)){
+                      <li><a onclick="addTab($(this));" rel="swift-DB" title="../swiftDB/Default.cshtml" href="#">Swift DB</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + edoc_id)){
+                      <li><a onclick="addTab($(this));" rel="e-DOC" title="../eDOC/Default.cshtml" href="#">E-DOC</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + ecrm_id)){
+                      <li><a onclick="addTab($(this));" rel="e-CRM" title="../eCRM/Default.cshtml" href="#">E-CRM</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + edm_id)){
+                      <li><a onclick="addTab($(this));" rel="e-DM" title="../eDM/Default.cshtml" href="#">E-DM</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + gct_id)){
+                      <li><a onclick="addTab($(this));" rel="e-GCT" title="../giro_tool/Default.cshtml" href="#">MMPC Backend</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + fve_id)){
+                      <li><a onclick="addTab($(this));" rel="e-FVE" title="../fvetl/Default.cshtml" href="#">Funds Verification ETL</a></li>
+                    }
+					@if(mypermission.Contains("mod_all_" + ddfw_id)){
+						<li><a onclick="addTab($(this));" rel="e-ddfw" title="~/ddfw/Default.cshtml" href="#">D.Dealing/F.Waiver/Fixed Dep.</a></li>
+						}
+						@if(mypermission.Contains("mod_all_" + cat2_id)){
+						<li><a onclick="addTab($(this));" rel="e-cat2" title="~/cat2/Default.cshtml" href="#">CAT2 Module</a></li>
+						}
+		    @if(mypermission.Contains("mod_all_" + eod_id)){
+                      <li><a onclick="addTab($(this));" rel="e-eodrtcs" title="~/eodrtcs/Default.cshtml" href="#">EODRTCS</a></li>
+                    }
+		    @if(mypermission.Contains("mod_all_" + dp_id)){
+                    <li><a onclick="addTab($(this));" rel="e-docpre" title="~/docpre/DocPreListing.cshtml" href="#">Document Preparation</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + cdc_id)){
+                      <li><a onclick="addTab($(this));" rel="e-cdc" title="~/cdc/daily_fin_report.cshtml" href="#">CDC</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + autochq_id)){
+                      <li><a onclick="addTab($(this));" rel="e-ac" title="~/autocheque/Default.cshtml" href="#">Auto Cheque</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + h2h_mmpc_id)){
+                      <li><a onclick="addTab($(this));" rel="e-mmpc" title="~/h2h_giro_tool/Default.cshtml" href="#">Host2Host MMPC (Backend)</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + h2h_etl_id)){
+                      <li><a onclick="addTab($(this));" rel="e-h2h" title="~/h2h/Default.cshtml" href="#">Host2Host ETL</a></li>
+                    }					
+                  </ul>
+                </li>
+              </ul>
+            }
+            @if(mypermission.Contains("mod_all_" + eos_id) || mypermission.Contains("mod_all_" + ums_id) || mypermission.Contains("mod_all_" + param_id)){
+              <ul class="nav" id="administrator-nav">
+                <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Administrator<b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                    <li><a onclick="addTab($(this));" rel="eos-ann" title="../announcement1/list_an.cshtml" href="#">Announcement Settings</a></li>
+                    @if(mypermission.Contains("mod_all_" + eos_id)){
+                      <li><a onclick="addTab($(this));" rel="eos-main" title="../EOS/admin/Default.cshtml" href="#">EOS Main Settings</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + ums_id)){
+                      <li><a onclick="addTab($(this));" rel="eos-ums" title="../ums/Default.cshtml" href="#">UMS</a></li>
+                    }
+                    @if(mypermission.Contains("mod_all_" + param_id)){
+                      <li><a onclick="addTab($(this));" rel="eos-param" title="../parameter/Default.cshtml" href="#">Parameter Settings</a></li>
+                    }
+                  </ul>
+                </li>
+              </ul>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="container" style="padding-top: 50px">
+        <div class="row">
+          <div id="loading" class="span12">
+            <img id="loading-image" src="images/ajax-loader.gif" alt="Loading..." />
+          </div>
+        </div>
+        <div class="row">
+          <div class="span12">
+            <div class="tabbable" id="wrapper">
+              <ul class="nav nav-tabs" id="tabs">
+                <!-- Tabs go here -->
+                <li class="active">
+                  <a class="tab" data-toggle="tab" id="eos-announcement" href="#">EOS Announcement</a>
+                </li>
+                <li>
+                  <a class="tab" data-toggle="tab" id="eos-home" href="#">EOS Home</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="content">
+                <!-- Tab content goes here -->
+                <div class="tab-pane" id="eos-announcement_content">
+                  <iframe name="announcement_frame" id="announcement_frame" src="../announcement1/show.cshtml" frameborder="0" scrolling="no" onload="resizeIframe(this);" style="min-height: 850px" width="100%"></iframe>
+                </div>
+                <div class="tab-pane" id="eos-home_content">
+                  <iframe name="main_frame" id="main_frame" src="../EOS/mainContainer.cshtml" frameborder="0" scrolling="no" onload="resizeIframe(this);" style="min-height: 850px" width="100%"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="span12">
+            <!--<iframe name="main_frame" id="main_frame" src="../EOS/mainContainer.cshtml" frameborder="0" scrolling="no" onload="resizeIframe(this);" style="min-height: 850px" width="100%"></iframe>-->
+            <iframe width="1px" height="1px" frameborder="0" scrolling="no" id="active_datetime" src="active_dt.cshtml" name="active_datetime"></iframe>
+          </div>
+        </div>
+      </div>
+      <script src="bootstrap/js/jquery.js"></script>
+      <script src="bootstrap/js/bootstrap.min.js"></script>
+	    <script src="eCRM/Content/Jquery-Confirm/jquery-confirm.min.js"></script>
+      <script>
+
+	    $(window).load(function () {
+	    	setTimeout(function () {
+	    		$('#loading').hide();
+	    	}, 500);
+	    });
+
+	    function resizeIframe(obj) {
+	    	obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+	    	//obj.style.width = obj.contentWindow.document.body.scrollWidth + 'px';
+	    }
+
+	    function resizeChild(frameName, x) {
+	    	document.getElementById(frameName + '_frame').style.height = x + 'px';
+	    }
+
+	    function getSize() {
+	    	alert(document.getElementById('#update-log_frame'));
+	    }
+
+	    $(document).ready(function () {
+
+	    	//newtab
+	    	/*$("#documents a").click(function () {
+	    	addTab($(this));
+	    	});*/
+
+	    	$(document).on('click', '#whats-new-div', function () {
+	    		resizeIframe(document.getElementById('#update-log_frame'));
+	    	});
+
+	    	$("#eos-announcement_content").show();
+
+	    	$(document).on('click', '#brand li a.brand', function () {
+	    		// Get the tab name
+	    		var contentname = "eos-home_content";
+	    		// hide all other tabs
+	    		$("#content div").hide();
+	    		$("#tabs li").removeClass("active");
+	    		// show current tab
+	    		$("#" + contentname).show();
+	    		$("#eos-home").parent().addClass("active");
+	    	});
+
+	    	$(document).on('click', '#tabs li a.tab', function () {
+	    		// Get the tab name
+	    		var contentname = $(this).attr("id") + "_content";
+	    		// hide all other tabs
+	    		$("#content div").hide();
+	    		$("#tabs li").removeClass("active");
+	    		// show current tab
+	    		$("#" + contentname).show();
+	    		$(this).parent().addClass("active");
+	    	});
+
+	    	$(document).on('click', '#tabs li a i.remove', function () {
+	    		// Get the tab name
+	    		var tabid = $(this).parent(".tab").attr("id");
+	    		// remove tab and related content
+	    		var contentname = tabid + "_content";
+	    		$("#" + contentname).remove();
+	    		$(this).parent().parent().remove();
+
+	    		// if there is no current tab and if there are still tabs left, show the first one
+	    		var activeLength = $("#tabs li.active").length;
+	    		var listLength = $("#tabs li").length;
+	    		if (activeLength == 0 && listLength > 0) {
+	    			// find the first tab
+	    			var firsttab = $("#tabs li:first-child");
+	    			firsttab.addClass("active");
+	    			// get its link name and show related content
+	    			var firsttabid = $(firsttab).find("a.tab").attr("id");
+	    			$("#" + firsttabid + "_content").show();
+	    		}
+	    	});
+	    });
+
+	    function addTab(link) {
+	    	// If tab already exist in the list, return
+	    	if ($("#" + $(link).attr("rel")).length != 0) {
+	    		return;
+	    	}
+
+	    	var maxTab_length = 8;
+	    	var listLength = $("#tabs li").length;
+	    	if (listLength <= maxTab_length) {
+	    		// hide other tabs
+	    		$("#tabs li").removeClass("active");
+	    		$("#content div").hide();
+
+	    		// add new tab and related content
+	    		$("#tabs").append("<li class='active'><a class='tab' data-toggle='tab' id='" +
+	            $(link).attr("rel") + "' href='#'>" + $(link).html() +
+	            "<i class='icon-remove remove'></i></a></li>");
+	    		$("#content").append("<div class='tab-pane' id='" + $(link).attr("rel") + "_content'><iframe name='" + $(link).attr("rel") + "_frame' id='" + $(link).attr("rel") + "_frame' src='" + $(link).attr("title") + "' frameborder='0' scrolling='no' onload='resizeIframe(this);' style='min-height: 950px' width='100%'></iframe></div>");
+	    		// set the newly added tab as curren
+	    		$("#" + $(link).attr("rel") + "_content").show();
+	    	}
+	    	else {
+	    		alert("You can only open a maximum "+maxTab_length+" tabs.\nPlease close some tabs to continue.");
+	    		return;
+	    	}
+
+	    }
+			function AdjustIframeHeight(i,j){
+			document.getElementById(j).style.height = (parseInt(i)) + "px";
+//alert("iframe working " + i);
+document.getElementById(j).style.minHeight = "10px";
+			}
+
+      </script>
+    </body>
+</html>
+
+@{
+  db_sys.Close();
+  db_sys.Dispose();
+  db_ums.Close();
+  db_ums.Dispose();
+}

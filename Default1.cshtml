@@ -1,0 +1,299 @@
+﻿@using System.Net;
+@using System.Net.Sockets;
+
+@{
+    var user = "GUEST";
+
+    if(Session["s_un"] != null){
+        Response.Redirect("master.cshtml");
+    }
+
+    string username = "";
+    string password = "";
+
+    bool isValid = true;
+    bool isSuccess = true;
+    string errMsg = "";
+    
+    long? u_id = null;
+    string up = "";
+    string temp_up = "";
+    int login_attempt = 0;
+    var today = DateTime.Today;
+    var last_updated = DateTime.Today;
+    bool first_login = false;
+    bool user_status = true;
+    bool user_active = true;
+    var current_time = DateTime.Now;
+    var u_active_time = DateTime.Now;
+    var compare_time = new TimeSpan(0,5,0);
+    bool is_active = false;
+    int role_id = 0;
+    var db_ums = Database.Open("eos_ums");
+    var db_log = Database.Open("eos_log");
+    string sql = "";
+    bool has_user = false;
+    bool up_force = false;
+
+    string server_ip = "";
+
+    if(IsPost){
+        
+        username = Request.Form["username"];
+        password = Request.Form["password"];
+        
+
+        if(username.IsEmpty()){
+            errMsg += "Username";
+            if(password.IsEmpty()){
+                errMsg += " and Password";
+                isValid = false;
+            }
+            isValid = false;
+            errMsg += " cannot be empty.";
+        }
+        else if(password.IsEmpty()){
+            errMsg += "Password cannot be empty.";
+            isValid = false;
+        }
+        
+
+        if(isValid){
+            sql = "Select COUNT(*) as no_user FROM tbl_uLogin WHERE u_un = '"+username+"'";
+            var resultCount = db_ums.QuerySingle(sql);
+            int count_user = resultCount.no_user;
+            if(count_user != 1){
+                has_user = false;
+            }
+            else{
+                has_user = true;
+            }
+        
+            if(has_user){
+                try{
+                    sql = "UPDATE tbl_uLogin SET u_up_temp = convert(varchar(50), HASHBYTES('MD5','" + password.Replace("'","''") + "'),2) WHERE u_un = '"+username+"'";
+                    
+                    var rTemp = db_ums.Execute(sql);
+                }
+                catch{}
+
+                sql = "Select * FROM tbl_uLogin WHERE u_un = '" + username +"'";
+                var rUser = db_ums.Query(sql);
+
+                foreach(var row in rUser){
+                    u_id = row.u_id;
+                    up = row.u_up;
+                    temp_up = row.u_up_temp;
+                    login_attempt = row.u_attempt;
+                    last_updated = row.up_updated;
+                    first_login = row.u_first_login;
+                    user_status = row.u_status;
+                    user_active = row.u_active;
+                    u_active_time = row.active_datetime??DateTime.MinValue;
+                    up_force = row.up_force;
+                }
+
+                if(DateTime.Now.Subtract(u_active_time) <= compare_time){
+                    is_active = true;
+                }
+
+                if(!is_active || u_active_time == null || u_active_time.Equals(DateTime.MinValue)){
+                
+                    if(user_status){
+                        
+                        if(!user_active){
+                          isSuccess = false;
+                          Response.Redirect("login/account_deactivated.cshtml");
+                        }
+                        else{
+                          //more than 3 wrong login attempt
+                          if(login_attempt > 2){
+                            isSuccess = false;
+                            //suspend account
+                            login_attempt++;
+                            var q4 = db_ums.Execute("Update tbl_uLogin SET u_attempt =" + login_attempt + ", u_active = 0 WHERE u_id = '" + u_id + "'");
+                            Response.Redirect("login/account_deactivated.cshtml");
+                          }
+                          //less that 3 attemp
+                          else if(login_attempt <= 2){
+                            //right password
+                            if(temp_up.Equals(up)){
+                              //success status
+                              isSuccess = true;
+                              login_attempt = 0;
+                              server_ip = Request.ServerVariables["REMOTE_ADDR"];
+                              //reset attempt, insert ip
+                              var q2 = db_ums.Execute("Update tbl_uLogin SET [u_attempt] =" + login_attempt + ", active_ip='"+server_ip+"' WHERE u_id = '" + u_id + "'");
+                            }
+                            //wrong password
+                            else{
+                              //unsuccess status
+                              isSuccess = false;
+                              login_attempt++;
+                              if(login_attempt == 3){
+                                //set attempt, and deactivate user
+                                var q3 = db_ums.Execute("Update tbl_uLogin SET u_attempt =" + login_attempt + ", u_active = 0 WHERE u_id = '" + u_id + "'");
+                              }
+                              else{
+                                //set attempt
+                                var q3 = db_ums.Execute("Update tbl_uLogin SET u_attempt =" + login_attempt + " WHERE u_id = '" + u_id + "'");
+                              }
+                              //request password change if password wrong (for temporary)
+                              //Response.Redirect("login/pass_policy_change.cshtml");
+                            }
+                          }
+                          else{
+                              isSuccess = false;
+                          }
+                        }
+
+                        if(isSuccess){
+                            //save into session
+                            Session["s_un"] = username;
+                            Session["s_uid"] = u_id;
+
+                            var permchk = db_ums.QuerySingle("SELECT r_id_1 AS r1,r_id_2 AS r2,r_id_3 AS r3,r_id_4 AS r4,r_id_5 AS r5,r_id_6 AS r6,r_id_7 AS r7,r_id_8 AS r8,r_id_9 AS r9,r_id_10 AS r10,r_id_11 AS r11,r_id_12 AS r12,r_id_13 AS r13,r_id_14 AS r14,r_id_15 AS r15,r_id_16 AS r16,r_id_17 AS r17,r_id_18 AS r18,r_id_19 AS r19,r_id_20 AS r20 FROM tbl_uRole WHERE u_id=" + u_id);
+   
+                            string permchk2 = (permchk.r1??0).ToString() + ',' + (permchk.r2??0).ToString() + ',' + (permchk.r3??0).ToString() + ',' + (permchk.r4??0).ToString() + ',' + (permchk.r5??0).ToString() + ',' + (permchk.r6??0).ToString() + ',' + (permchk.r7??0).ToString() + ',' + (permchk.r8??0).ToString() + ',' + (permchk.r9??0).ToString() + ',' + (permchk.r10??0).ToString() + ',' + (permchk.r11??0).ToString() + ',' + (permchk.r12??0).ToString() + ',' + (permchk.r13??0).ToString() + ',' + (permchk.r14??0).ToString() + ',' + (permchk.r15??0).ToString() + ',' + (permchk.r16??0).ToString() + ',' + (permchk.r17??0).ToString() + ',' + (permchk.r18??0).ToString() + ',' + (permchk.r19??0).ToString() + ',' + (permchk.r20??0).ToString();
+                            
+                            var queryperm = db_ums.Query("SELECT r_permission FROM tbl_role WHERE r_id IN (" + permchk2 + ")");
+                            List<String> mypermission = new List<String>();
+                            string [] perm = null;
+                            foreach(var row in queryperm){
+                                if(row.r_permission != null){
+                                    perm = row.r_permission.Split(',');
+
+                                    for(var i=0; i<perm.Length; i++){
+                                        mypermission.Add(perm[i]);
+                                    }
+                                }
+                            }
+
+                            //set session of permission in array
+                            Session["perm"] = mypermission.ToArray();
+
+                            EOSLog newLog = new EOSLog(Session["s_uid"].ToString());
+
+                            login_attempt = 0;
+                            var q3 = db_ums.Execute("Update tbl_uLogin SET [u_attempt] =" + login_attempt + ", active_datetime = CURRENT_TIMESTAMP WHERE u_id = " + u_id);
+
+                            if(!first_login){
+
+                              if(up_force){
+																Session["password_status"] = "first_login";
+                                Response.Write("<script>alert('Password must be change!');</script>");
+                                Response.Write("<script>window.location = 'login/first_pass.cshtml';</script>");
+                              }
+                              else{
+                                var diff_days = today.Subtract(last_updated);
+                                if(diff_days.Days < 30){
+                              
+                                  sql = newLog.getSQL(1,server_ip);
+                                  db_log.Execute(sql);
+
+																	Session["password_status"] = "ok";
+																	Response.Write("<script>window.open('EOS/main_dtl.cshtml', 'blank', 'left=1, top=1, resizable=yes, scrollbars=yes')</script>");
+                                  Response.Write("<script>window.location = 'master.cshtml';</script>");
+                                }
+                                else{
+																	Session["password_status"] = "expired";
+                                  Response.Write("<script>alert('Password must be change!');</script>");
+                                  Response.Write("<script>window.location = 'login/expired_pass.cshtml';</script>");
+                                }
+                              }
+                            }
+                            else{
+															Session["password_status"] = "first_login";
+                              Response.Write("<script>alert('Welcome, "+username+"!\nThis is your first time login to EOS V2.\nFor security purposes, please change your password.\n');</script>");
+                              Response.Write("<script>window.location = 'login/first_pass.cshtml';</script>");
+                            }
+                        }
+                        else{
+                            errMsg += "Wrong Password";
+                        }
+                    }
+                    else{
+                        Response.Write("<script type='text/javascript'>window.location = 'login/account_deactivated.cshtml';</script>");
+                    }
+                }
+                else{
+                    Response.Write("<script>alert('Account is already logged in.\\nWindow will be close.')</script>");
+                    Response.Write("<script>window.open('', '_self', '')</script>");
+                    Response.Write("<script>window.close()</script>");
+                }
+            }//end hasUser
+            else{
+                errMsg += "Username not registered! Please contact administrator.";
+            }
+        }//end isValid
+    }//end isPost
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>EOS V2</title>
+        <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+        <style type="text/css">
+          body {
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+          }
+
+          .form-signin {
+            max-width: 300px;
+            padding: 19px 29px 29px;
+            margin: 0 auto 20px;
+            background-color: #fff;
+            border: 1px solid #e5e5e5;
+            -webkit-border-radius: 5px;
+               -moz-border-radius: 5px;
+                    border-radius: 5px;
+            -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+               -moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+                    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+          }
+          .form-signin .form-signin-heading,
+          .form-signin .checkbox {
+            margin-bottom: 10px;
+          }
+          .form-signin input[type="text"],
+          .form-signin input[type="password"] {
+            font-size: 16px;
+            height: auto;
+            margin-bottom: 15px;
+            padding: 7px 9px;
+          }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <form name="login_form" class="form-signin" method="post" action="#">
+                <h2 class="form-signin-heading">MCBM EOS</h2>
+                <h4 class="form-signin-heading">Please sign in</h4>
+                <label>Username :</label>
+                <input type="text" class="input-block-level" placeholder="Username" name="username" id="username">
+                <label>Password :</label>
+                <input type="password" class="input-block-level" placeholder="Password" name="password" id="password">
+                <button class="btn btn-large btn-primary" type="submit" data-loading-text="Logging in...">Sign in</button>
+                <span><a href="login/forget_pass.cshtml">Forget Password?</a></span>
+                <p>&nbsp;</p>
+                @if(errMsg != ""){
+                    <div class="alert alert-error">
+                        <button type="button" class="close fade in" data-dismiss="alert">&times;</button>
+                        <span>@errMsg</span>
+                    </div>
+                }
+            </form>
+        </div>
+        <script src="bootstrap/js/jquery.js"></script>
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+        <script type="text/javascript">
+            $('.alert').alert()
+        </script>
+    </body>
+</html>

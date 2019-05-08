@@ -1,0 +1,37 @@
+﻿@{
+    if(Session["s_uid"] == "" || Session["s_un"] == "" || Session["s_uid"] == null || Session["s_un"] == null){
+      Response.Write("<script>window.top.location = 'expired.cshtml';</script>");
+    }
+    else{
+      var db_ums = Database.Open("eos_ums");
+
+      string sql = "";
+
+      sql = "UPDATE tbl_uLogin SET active_datetime = CURRENT_TIMESTAMP WHERE u_id = " + Session["s_uid"];
+      db_ums.Execute(sql);
+    }
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>EOS V2</title>
+  </head>
+  <body>
+    <script>
+      function refreshPage() {
+        location.href = 'active_dt.cshtml';
+      }
+
+      var count = 300;
+      setInterval(function () {
+        --count;
+        if (count < 0) {
+          refreshPage();
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

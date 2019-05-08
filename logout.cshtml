@@ -1,0 +1,32 @@
+﻿@{
+    var login_attempt = 0;
+    string server_ip = Request.ServerVariables["REMOTE_ADDR"];
+
+    if(Session["s_uid"] != null){
+      var db_log = Database.Open("eos_log");
+      EOSLog newLog = new EOSLog(Session["s_uid"].ToString());
+      string sql = newLog.getSQL(2,server_ip);
+      db_log.Execute(sql);
+
+      var db_ums = Database.Open("eos_ums");
+      var q1 = db_ums.Execute("UPDATE tbl_uLogin SET u_attempt = " + login_attempt + ", active_datetime = '2001-01-01' WHERE u_id = '"+Session["s_uid"]+"'");
+
+			Session.Abandon();
+    }
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+        <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
+        <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+        <script type="text/javascript">   
+            window.history.forward(1);
+            //window.close();
+        </script>
+    </head>
+    <body onload="parent.location.href('Default.cshtml');"></body>
+</html>
